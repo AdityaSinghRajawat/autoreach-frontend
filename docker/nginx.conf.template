@@ -1,0 +1,49 @@
+# Rendered at start-up by the nginx image: ${API_ORIGIN} and ${API_UPSTREAM} come from the environment.
+server {
+    listen 8080;
+    server_name _;
+    root /usr/share/nginx/html;
+    server_tokens off;
+
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml;
+
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' ${API_ORIGIN}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+
+    location = /healthz {
+        access_log off;
+        return 200 "ok\n";
+    }
+
+    # Written by 40-runtime-config.sh, so one image serves any API.
+    location = /config.js {
+        alias /tmp/autoreach/config.js;
+        expires -1;
+    }
+
+    # Same-origin deployments proxy the API; the activity stream needs buffering off.
+    location /api/ {
+        proxy_pass ${API_UPSTREAM};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+        proxy_read_timeout 1h;
+    }
+
+    # Cache rules use expires, not add_header: a location's add_header would drop the security headers above.
+    # Hashed build files never change, so browsers keep them for a year.
+    location /assets/ {
+        expires 1y;
+        try_files $uri =404;
+    }
+
+    location / {
+        expires -1;
+        try_files $uri /index.html;
+    }
+}
