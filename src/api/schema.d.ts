@@ -1427,7 +1427,7 @@ export interface components {
             phoneNumber: string | null;
             linkedinUrl: string | null;
             /** @enum {string} */
-            enrichmentProvider: "APOLLO" | "SIGNALHIRE" | "CONTACTOUT";
+            enrichmentProvider: "APOLLO" | "SIGNALHIRE" | "CONTACTOUT" | "HUNTER";
             isEmailVerified: boolean;
             /** @enum {string} */
             emailVerificationStatus: "UNVERIFIED" | "VERIFIED" | "RISKY" | "INVALID";

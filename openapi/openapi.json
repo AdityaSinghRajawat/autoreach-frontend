@@ -6175,7 +6175,8 @@
             "enum": [
               "APOLLO",
               "SIGNALHIRE",
-              "CONTACTOUT"
+              "CONTACTOUT",
+              "HUNTER"
             ]
           },
           "isEmailVerified": {
